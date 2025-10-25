@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Asignación Debug</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Test de Asignación - Debug</h1>
+  <div id="output"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://jrttvyebgxzygiknksac.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpydHR2eWViZ3h6eWdpa25rc2FjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NzExMTUsImV4cCI6MjA3NjU0NzExNX0.8T75vHd_BTLxAl2R1WnE8Uh_CPay7R1ewAMNUchuMmI';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function log(msg) {
+      console.log(msg);
+      document.getElementById('output').innerHTML += `<p>${msg}</p>`;
+    }
+
+    async function testAsignarTrabajador() {
+      const trabajadorId = 16;
+      const obraId = 3;
+      const cargoEnObra = 'TEST-BROWSER';
+
+      try {
+        log('1️⃣ Estado inicial...');
+        const { data: antes } = await supabase
+          .from('trabajadores_obras')
+          .select('*')
+          .eq('trabajador_id', trabajadorId);
+        log(`Asignaciones antes: ${JSON.stringify(antes)}`);
+
+        log('2️⃣ Desactivando asignaciones...');
+        const { data: updateData, error: updateError } = await supabase
+          .from('trabajadores_obras')
+          .update({
+            activo: false,
+            fecha_retiro: new Date().toISOString()
+          })
+          .eq('trabajador_id', trabajadorId)
+          .eq('activo', true)
+          .select();
+
+        if (updateError) {
+          log(`❌ Error UPDATE: ${JSON.stringify(updateError)}`);
+        } else {
+          log(`✅ UPDATE: ${updateData?.length} filas actualizadas`);
+        }
+
+        log('3️⃣ Insertando nueva asignación...');
+        const { data: insertData, error: insertError } = await supabase
+          .from('trabajadores_obras')
+          .insert([{
+            obra_id: obraId,
+            trabajador_id: trabajadorId,
+            cargo_en_obra: cargoEnObra,
+            activo: true
+          }])
+          .select()
+          .single();
+
+        if (insertError) {
+          log(`❌ Error INSERT: ${JSON.stringify(insertError)}`);
+        } else {
+          log(`✅ INSERT exitoso: ${JSON.stringify(insertData)}`);
+        }
+
+        log('4️⃣ Estado final...');
+        const { data: despues } = await supabase
+          .from('trabajadores_obras')
+          .select('*')
+          .eq('trabajador_id', trabajadorId);
+        log(`Asignaciones después: ${JSON.stringify(despues)}`);
+
+      } catch (error) {
+        log(`❌ Error general: ${error.message}`);
+      }
+    }
+
+    // Ejecutar test al cargar la página
+    testAsignarTrabajador();
+  </script>
+</body>
+</html>

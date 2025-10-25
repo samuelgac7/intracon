@@ -1,0 +1,252 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Building2, Lock, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
+import * as usuariosService from "@/services/usuarios"
+import bcrypt from 'bcryptjs'
+
+export default function CambiarPasswordPage() {
+  const router = useRouter()
+  const { sesion, updateMustChangePassword } = useAuth()
+  const [passwordActual, setPasswordActual] = useState("")
+  const [passwordNueva, setPasswordNueva] = useState("")
+  const [passwordConfirm, setPasswordConfirm] = useState("")
+  const [showPasswords, setShowPasswords] = useState(false)
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  if (!sesion) {
+    router.push('/login')
+    return null
+  }
+
+  const validarPassword = (pass: string): string | null => {
+    if (pass.length < 8) {
+      return "La contraseña debe tener al menos 8 caracteres"
+    }
+    if (!/[A-Z]/.test(pass)) {
+      return "Debe incluir al menos una letra mayúscula"
+    }
+    if (!/[a-z]/.test(pass)) {
+      return "Debe incluir al menos una letra minúscula"
+    }
+    if (!/[0-9]/.test(pass)) {
+      return "Debe incluir al menos un número"
+    }
+    return null
+  }
+
+  const handleCambiar = async () => {
+    setError("")
+    setLoading(true)
+
+    try {
+      if (!passwordActual || !passwordNueva || !passwordConfirm) {
+        setError("Todos los campos son obligatorios")
+        setLoading(false)
+        return
+      }
+
+      if (passwordNueva !== passwordConfirm) {
+        setError("Las contraseñas nuevas no coinciden")
+        setLoading(false)
+        return
+      }
+
+      const errorValidacion = validarPassword(passwordNueva)
+      if (errorValidacion) {
+        setError(errorValidacion)
+        setLoading(false)
+        return
+      }
+
+      // Obtener usuario desde Supabase
+      const usuario = await usuariosService.getById(sesion.usuarioId)
+
+      if (!usuario || !usuario.credenciales) {
+        setError("Error al encontrar usuario")
+        setLoading(false)
+        return
+      }
+
+      // Validar contraseña actual usando bcrypt
+      const esPasswordValida = await bcrypt.compare(passwordActual, usuario.credenciales.passwordHash)
+      if (!esPasswordValida) {
+        setError("La contraseña actual es incorrecta")
+        setLoading(false)
+        return
+      }
+
+      // Actualizar contraseña en Supabase
+      await usuariosService.changePassword(sesion.usuarioId, passwordNueva, false)
+
+      // Actualizar estado en el hook useAuth
+      updateMustChangePassword(false)
+
+      alert('✅ Contraseña cambiada exitosamente')
+      router.push('/dashboard')
+
+    } catch (err) {
+      console.error('Error al cambiar contraseña:', err)
+      setError("Error al cambiar contraseña")
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0066cc] to-[#004999] p-4">
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+      </div>
+
+      <Card className="w-full max-w-md relative z-10 shadow-2xl">
+        <CardHeader className="space-y-3 text-center pb-6">
+          <div className="mx-auto w-16 h-16 bg-[#0066cc] rounded-2xl flex items-center justify-center shadow-lg">
+            <Building2 className="h-10 w-10 text-white" />
+          </div>
+          
+          <div>
+            <CardTitle className="text-2xl font-bold">Cambiar Contraseña</CardTitle>
+            <CardDescription className="text-base mt-1">
+              {sesion.mustChangePassword 
+                ? "Por seguridad, debe cambiar su contraseña temporal"
+                : "Actualice su contraseña de acceso"}
+            </CardDescription>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive" className="animate-in fade-in-50">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {sesion.mustChangePassword && (
+            <Alert className="border-yellow-200 bg-yellow-50 text-yellow-800">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Por seguridad, debe cambiar su contraseña temporal antes de continuar.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="passwordActual">Contraseña Actual</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                id="passwordActual"
+                type={showPasswords ? "text" : "password"}
+                value={passwordActual}
+                onChange={(e) => setPasswordActual(e.target.value)}
+                className="pl-10"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="passwordNueva">Contraseña Nueva</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                id="passwordNueva"
+                type={showPasswords ? "text" : "password"}
+                value={passwordNueva}
+                onChange={(e) => setPasswordNueva(e.target.value)}
+                className="pl-10"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="passwordConfirm">Confirmar Contraseña Nueva</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                id="passwordConfirm"
+                type={showPasswords ? "text" : "password"}
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                className="pl-10 pr-10"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords(!showPasswords)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                tabIndex={-1}
+              >
+                {showPasswords ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs">
+            <div className="font-semibold text-blue-900 mb-2">Requisitos de contraseña:</div>
+            <ul className="space-y-1 text-blue-800">
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3 w-3" />
+                Mínimo 8 caracteres
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3 w-3" />
+                Al menos una mayúscula
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3 w-3" />
+                Al menos una minúscula
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3 w-3" />
+                Al menos un número
+              </li>
+            </ul>
+          </div>
+        </CardContent>
+
+        <CardFooter className="flex gap-2">
+          {!sesion.mustChangePassword && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push('/dashboard')}
+              className="flex-1"
+              disabled={loading}
+            >
+              Cancelar
+            </Button>
+          )}
+          <Button
+            type="button"
+            onClick={handleCambiar}
+            className="flex-1 text-white"
+            style={{ backgroundColor: '#0066cc' }}
+            disabled={loading || !passwordActual || !passwordNueva || !passwordConfirm}
+          >
+            {loading ? (
+              <>
+                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Cambiando...
+              </>
+            ) : (
+              'Cambiar Contraseña'
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  )
+}
