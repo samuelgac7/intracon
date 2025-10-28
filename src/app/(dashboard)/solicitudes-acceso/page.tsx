@@ -123,12 +123,13 @@ export default function SolicitudesAccesoPage() {
 
       // Recargar desde servidor para asegurar sincronización
       await cargarSolicitudes()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'No se pudo aprobar la solicitud'
       console.error('Error aprobando solicitud:', error)
       addToast({
         type: 'error',
         title: 'Error',
-        description: error.message || 'No se pudo aprobar la solicitud'
+        description: errorMessage
       })
     } finally {
       setProcesando(false)
@@ -174,12 +175,13 @@ export default function SolicitudesAccesoPage() {
       console.log('🔄 Recargando solicitudes desde servidor...')
       await cargarSolicitudes()
       console.log('✅ Solicitudes recargadas')
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'No se pudo rechazar la solicitud'
       console.error('Error rechazando solicitud:', error)
       addToast({
         type: 'error',
         title: 'Error',
-        description: error.message || 'No se pudo rechazar la solicitud'
+        description: errorMessage
       })
     } finally {
       setProcesando(false)

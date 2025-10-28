@@ -76,7 +76,7 @@ export default function TabContratos({ trabajadorId, trabajador, obras }: TabCon
     setGenerando(true)
     try {
       const obra = obras.find(o => o.id === parseInt(formContrato.obra_id))
-      const ciudadContrato = obra?.ubicacion?.split(',')[0]?.trim() || 'Santiago'
+      const ciudadContrato = obra?.comuna || 'Santiago'
 
       const contrato = await contratosService.crear({
         trabajador_id: trabajadorId,
@@ -115,9 +115,9 @@ export default function TabContratos({ trabajadorId, trabajador, obras }: TabCon
       })
       
       await cargarContratos()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error)
-      alert('❌ Error generando contrato: ' + (error.message || 'Error desconocido'))
+      alert('❌ Error generando contrato: ' + (error instanceof Error ? error.message : String(error) || 'Error desconocido'))
     } finally {
       setGenerando(false)
     }
@@ -144,9 +144,9 @@ export default function TabContratos({ trabajadorId, trabajador, obras }: TabCon
       setFormAnexo({ nueva_fecha_termino: '' })
       
       await cargarContratos()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error)
-      alert('❌ Error generando anexo: ' + (error.message || 'Error desconocido'))
+      alert('❌ Error generando anexo: ' + (error instanceof Error ? error.message : String(error) || 'Error desconocido'))
     } finally {
       setGenerando(false)
     }

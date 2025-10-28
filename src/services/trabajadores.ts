@@ -1,4 +1,5 @@
 import { supabase, type Trabajador } from '@/lib/supabase'
+import { auditoriaService } from './auditoria'
 
 /**
  * Servicio para la gestión de trabajadores (personal de terreno)

@@ -238,7 +238,7 @@ async function migrate() {
   try {
     // Verificar conexión
     console.log('🔌 Verificando conexión a Supabase...')
-    const { data: testData, error: testError } = await supabase
+    const { error: testError } = await supabase
       .from('trabajadores')
       .select('count')
       .limit(1)
@@ -294,8 +294,8 @@ async function migrate() {
     console.log('   ✅ mgonzalez / tecnico2024 (Usuario - debe cambiar contraseña)')
     console.log('   ❌ csilva - SIN acceso (obrero)\n')
 
-  } catch (error: any) {
-    console.error('❌ Error en migración:', error.message)
+  } catch (error: unknown) {
+    console.error('❌ Error en migración:', error instanceof Error ? error.message : String(error))
   }
 }
 

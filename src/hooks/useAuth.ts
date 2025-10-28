@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import * as usuariosService from '@/services/usuarios'
+import { auditoriaService } from '@/services/auditoria'
 import type { Usuario } from '@/lib/supabase'
 
 // Storage personalizado para SSR
@@ -77,9 +78,29 @@ export const useAuth = create<AuthStore>()(
           isAuthenticated: true,
           isLoading: false
         })
+
+        // Registrar evento de login (no bloqueante)
+        auditoriaService.registrarEvento({
+          usuarioId: usuario.id,
+          accion: 'login',
+          modulo: 'auth',
+          detalles: `Usuario ${usuario.nombre} (${usuario.rol}) inició sesión`
+        }).catch(err => console.error('Error registrando login:', err))
       },
 
       logout: () => {
+        const { sesion } = get()
+
+        // Registrar logout antes de limpiar la sesión
+        if (sesion) {
+          auditoriaService.registrarEvento({
+            usuarioId: sesion.usuarioId,
+            accion: 'logout',
+            modulo: 'auth',
+            detalles: `Usuario ${sesion.nombre} cerró sesión`
+          }).catch(err => console.error('Error registrando logout:', err))
+        }
+
         set({
           sesion: null,
           usuario: null,

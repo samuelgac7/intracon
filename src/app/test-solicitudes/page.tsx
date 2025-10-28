@@ -19,8 +19,8 @@ export default function TestSolicitudesPage() {
         mensaje_solicitud: 'Test de creación'
       })
       setResult({ success: true, data: solicitud })
-    } catch (error: any) {
-      setResult({ success: false, error: error.message, details: error })
+    } catch (error: unknown) {
+      setResult({ success: false, error: error instanceof Error ? error.message : String(error), details: error })
       console.error('Error completo:', error)
     } finally {
       setLoading(false)
@@ -32,8 +32,8 @@ export default function TestSolicitudesPage() {
     try {
       const solicitudes = await solicitudesAccesoService.getAll()
       setResult({ success: true, data: solicitudes, count: solicitudes.length })
-    } catch (error: any) {
-      setResult({ success: false, error: error.message, details: error })
+    } catch (error: unknown) {
+      setResult({ success: false, error: error instanceof Error ? error.message : String(error), details: error })
       console.error('Error completo:', error)
     } finally {
       setLoading(false)
@@ -45,8 +45,8 @@ export default function TestSolicitudesPage() {
     try {
       const count = await solicitudesAccesoService.countPendientes()
       setResult({ success: true, count })
-    } catch (error: any) {
-      setResult({ success: false, error: error.message, details: error })
+    } catch (error: unknown) {
+      setResult({ success: false, error: error instanceof Error ? error.message : String(error), details: error })
       console.error('Error completo:', error)
     } finally {
       setLoading(false)

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -58,7 +59,7 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
   } = useAsistenciaMensual(obraId, mes, anio)
 
   // Cargar festivos
-  const { festivos, esFestivo: esFestivoFn, getFestivo } = useFestivos(anio)
+  const { esFestivo: esFestivoFn, getFestivo } = useFestivos(anio)
 
   const [dialogBono, setDialogBono] = useState(false)
   const [trabajadorBono, setTrabajadorBono] = useState<number | null>(null)
@@ -119,7 +120,7 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
         title: "Guardado exitoso",
         description: `Se guardaron ${resultado.exitosos} registros`
       })
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -147,7 +148,7 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
           description: "El bono mensual fue guardado correctamente"
         })
         setDialogBono(false)
-      } catch (error) {
+      } catch {
         addToast({
           type: "error",
           title: "Error",
@@ -166,7 +167,7 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
         title: "Excel exportado",
         description: "El archivo se descargó correctamente"
       })
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al exportar:', error)
       addToast({
         type: "error",
@@ -224,7 +225,7 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
   // Helper: Calcular completitud (días marcados vs días totales)
   const calcularCompletitud = (diasMap: Map<number, any>) => {
     let diasMarcados = 0
-    let diasNoMarcados: number[] = []
+    const diasNoMarcados: number[] = []
 
     for (let dia = 1; dia <= diasEnMes; dia++) {
       const reg = diasMap.get(dia)
@@ -310,12 +311,12 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
                 Posibles causas:
               </p>
               <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
-                <li>No hay trabajadores asignados en la pestaña "Trabajadores"</li>
+                <li>No hay trabajadores asignados en la pestaña &quot;Trabajadores&quot;</li>
                 <li>Los trabajadores están marcados como inactivos</li>
                 <li>Error al cargar datos (revisa la consola del navegador)</li>
               </ul>
               <p className="text-xs text-blue-600 mt-3">
-                💡 Presiona F12 y ve a "Console" para ver detalles técnicos
+                💡 Presiona F12 y ve a &quot;Console&quot; para ver detalles técnicos
               </p>
             </div>
           </CardContent>
@@ -333,9 +334,9 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
           <p className="text-gray-600">Gestión rápida de asistencia por mes</p>
         </div>
         <div className="flex items-center gap-3">
-          {celdasModificadas > 0 && (
+          {celdasModificadas.size > 0 && (
             <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-              {celdasModificadas} cambios sin guardar
+              {celdasModificadas.size} cambios sin guardar
             </Badge>
           )}
           {/* Botones Deshacer/Rehacer */}
@@ -371,7 +372,7 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
           </Button>
           <Button
             onClick={handleGuardar}
-            disabled={guardando || celdasModificadas === 0}
+            disabled={guardando || celdasModificadas.size === 0}
             className="text-white"
             style={{ backgroundColor: '#0066cc' }}
           >
@@ -572,10 +573,12 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
                       <td className="px-4 py-2 whitespace-nowrap bg-blue-50 sticky left-0 z-10 border-r-2">
                         <div className="flex items-center gap-2">
                           {item.trabajador.foto ? (
-                            <img
+                            <Image
                               src={item.trabajador.foto}
                               alt={item.trabajador.nombre}
-                              className="h-8 w-8 rounded-full object-cover"
+                              width={32}
+                              height={32}
+                              className="rounded-full object-cover"
                             />
                           ) : (
                             <div
@@ -690,8 +693,9 @@ export default function AsistenciaMensualView({ obraId, nombreObra }: Asistencia
                       )}
                     </td>
                   </tr>
-                ))
-              )}
+                )
+              })
+            )}
             </tbody>
           </table>
         </div>

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Plus, Building2, Activity, Clock, CheckCircle2, MapPin, DollarSign, Calendar, Users, Eye } from "lucide-react"
+import { Search, Plus, Building2, Activity, Clock, CheckCircle2, MapPin, DollarSign, Calendar, Eye } from "lucide-react"
 import { obrasService } from "@/services/obras"
 import type { Obra } from "@/lib/supabase"
 

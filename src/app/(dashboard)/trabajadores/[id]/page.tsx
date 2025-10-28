@@ -14,10 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useEffect, useTransition, useRef } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import {
-  X, Shield, Star, History, FileText, Upload, Download, Trash2, Printer,
-  Users, Building2, Calendar, Mail, Phone, MapPin, Briefcase,
-  AlertCircle, CheckCircle, Clock, FileCheck, UserCog, ChevronRight, Edit, User, ChevronDown
+  X, Shield, Star, History, FileText, Download, Trash2,
+  Users, Building2, Calendar, Briefcase,
+  AlertCircle, CheckCircle, FileCheck, UserCog, ChevronRight, Edit, User, ChevronDown
 } from "lucide-react"
 import { trabajadoresService } from "@/services/trabajadores"
 import { obrasService } from "@/services/obras"
@@ -191,7 +192,7 @@ export default function TrabajadorDetallePage({ params }: { params: Promise<{ id
         if (evalData.data) setEvaluaciones(evalData.data)
         if (histData.data) setHistorial(histData.data)
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error)
       addToast({
         type: "error",
@@ -250,11 +251,11 @@ export default function TrabajadorDetallePage({ params }: { params: Promise<{ id
       })
 
       cargarDatos()
-    } catch (error: any) {
+    } catch (error: unknown) {
       addToast({
         type: "error",
         title: "Error",
-        description: error?.message || "No se pudo asignar"
+        description: error instanceof Error ? error.message : "No se pudo asignar"
       })
     }
   }
@@ -287,11 +288,11 @@ export default function TrabajadorDetallePage({ params }: { params: Promise<{ id
       })
 
       cargarDatos()
-    } catch (error: any) {
+    } catch (error: unknown) {
       addToast({
         type: "error",
         title: "Error",
-        description: error.message || "No se pudo desasignar"
+        description: error instanceof Error ? error.message : String(error) || "No se pudo desasignar"
       })
     }
   }
@@ -316,11 +317,11 @@ export default function TrabajadorDetallePage({ params }: { params: Promise<{ id
       })
 
       setDialogCambiarEstado(false)
-    } catch (error: any) {
+    } catch (error: unknown) {
       addToast({
         type: "error",
         title: "Error",
-        description: error.message || "No se pudo cambiar el estado"
+        description: error instanceof Error ? error.message : String(error) || "No se pudo cambiar el estado"
       })
     }
   }
@@ -370,11 +371,11 @@ export default function TrabajadorDetallePage({ params }: { params: Promise<{ id
       })
 
       setDialogEditarTrabajador(false)
-    } catch (error: any) {
+    } catch (error: unknown) {
       addToast({
         type: "error",
         title: "Error",
-        description: error.message || "No se pudo actualizar"
+        description: error instanceof Error ? error.message : String(error) || "No se pudo actualizar"
       })
     }
   }
@@ -400,7 +401,7 @@ export default function TrabajadorDetallePage({ params }: { params: Promise<{ id
       if (data) {
         setHistorial([data, ...historial])
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error guardando historial:', error)
     }
   }
@@ -428,7 +429,7 @@ export default function TrabajadorDetallePage({ params }: { params: Promise<{ id
         description: "Documento eliminado"
       })
       cargarDatos()
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -604,7 +605,7 @@ export default function TrabajadorDetallePage({ params }: { params: Promise<{ id
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {trabajador.foto ? (
-                <img src={trabajador.foto} alt={trabajador.nombre} className="h-14 w-14 rounded-full object-cover" />
+                <Image src={trabajador.foto} alt={trabajador.nombre} width={56} height={56} className="rounded-full object-cover" />
               ) : (
                 <div className="flex h-14 w-14 items-center justify-center rounded-full text-white font-bold" style={{ backgroundColor: '#0066cc' }}>
                   {trabajador.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}

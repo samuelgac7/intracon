@@ -150,7 +150,7 @@ export default function HistorialAsistenciaModal({
                             </div>
                             {item.motivo && (
                               <p className="text-xs text-gray-500 mt-2 italic">
-                                "{item.motivo}"
+                                &quot;{item.motivo}&quot;
                               </p>
                             )}
                           </div>

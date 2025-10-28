@@ -6,14 +6,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Users, FileText, AlertTriangle, CheckCircle2, Clock, TrendingUp,
-  Calendar, Building2, DollarSign, Award, UserCheck, UserX,
-  FileCheck, FileClock, FileX, ArrowRight, Plus
+  Calendar, DollarSign, UserCheck, UserX,
+  ArrowRight
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { trabajadoresService } from '@/services/trabajadores'
 import { contratosService, type AlertaContrato } from '@/services/contratos'
 import { obrasService } from '@/services/obras'
-import type { Trabajador, Obra } from '@/lib/supabase'
 import Link from 'next/link'
 
 interface EstadisticasRRHH {
@@ -43,7 +42,7 @@ interface EstadisticasRRHH {
 }
 
 export default function RecursosHumanosPage() {
-  const { sesion, usuario } = useAuth()
+  const { usuario } = useAuth()
   const [loading, setLoading] = useState(true)
   const [estadisticas, setEstadisticas] = useState<EstadisticasRRHH | null>(null)
   const [alertasUrgentes, setAlertasUrgentes] = useState<AlertaContrato[]>([])

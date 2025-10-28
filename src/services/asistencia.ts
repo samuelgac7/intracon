@@ -267,7 +267,7 @@ export const asistenciaService = {
         )
         exitosos++
       } catch (error) {
-        errores.push(`Trabajador ${registro.trabajador_id}: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+        errores.push(`Trabajador ${registro.trabajador_id}: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Error desconocido'}`)
       }
     }
 

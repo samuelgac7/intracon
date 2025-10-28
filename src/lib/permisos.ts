@@ -1,5 +1,3 @@
-import type { Usuario } from './supabase'
-
 export type Rol = 'profesional' | 'visitador' | 'gerente' | 'super-admin'
 
 export type Permiso =
@@ -71,24 +69,7 @@ export type Permiso =
 // Definición de permisos por rol
 export const PERMISOS_POR_ROL: Record<Rol, Permiso[]> = {
   'profesional': [
-    // Trabajadores (solo lectura)
-    'trabajadores:read',
-
-    // Obras (solo lectura)
-    'obras:read',
-
-    // Documentos (solo lectura)
-    'documentos:read',
-
-    // Reportes
-    'evaluaciones:read',
-    'asistencia:read',
-
-    // Dashboard
-    'dashboard:basico'
-  ],
-
-  'visitador': [
+    // Usuario operativo diario (admin, RRHH, prevención)
     // Trabajadores (CRUD completo)
     'trabajadores:read',
     'trabajadores:read-all',
@@ -102,23 +83,62 @@ export const PERMISOS_POR_ROL: Record<Rol, Permiso[]> = {
     'obras:update',
     'obras:cambiar-estado',
 
-    // Documentos
+    // Documentos (gestión completa)
+    'documentos:read',
+    'documentos:upload-seguridad',
+    'documentos:upload-administrativo',
+    'documentos:upload-obra',
+    'documentos:delete',
+
+    // Asistencia (gestión completa)
+    'asistencia:read',
+    'asistencia:registrar',
+    'asistencia:editar',
+
+    // Evaluaciones (gestión)
+    'evaluaciones:read',
+    'evaluaciones:create-seguridad',
+    'evaluaciones:create-desempeno',
+
+    // Gastos (gestión)
+    'gastos:read',
+    'gastos:create',
+    'gastos:update',
+
+    // Dashboard operativo
+    'dashboard:operativo'
+  ],
+
+  'visitador': [
+    // Supervisor con KPIs de obras asignadas
+    // Trabajadores (supervisión)
+    'trabajadores:read',
+    'trabajadores:read-all',
+    'trabajadores:update',
+
+    // Obras (supervisión)
+    'obras:read',
+    'obras:read-all',
+    'obras:update',
+
+    // Documentos (revisión y carga)
     'documentos:read',
     'documentos:upload-seguridad',
     'documentos:upload-administrativo',
     'documentos:upload-obra',
 
-    // Asistencia
+    // Asistencia (registro)
     'asistencia:read',
     'asistencia:registrar',
     'asistencia:editar',
 
-    // Evaluaciones
+    // Evaluaciones (revisión)
     'evaluaciones:read',
-    'evaluaciones:create-seguridad',
-    'evaluaciones:create-desempeno',
 
-    // Dashboard
+    // Gastos (revisión)
+    'gastos:read',
+
+    // Dashboard operativo con mejores KPIs
     'dashboard:operativo'
   ],
 
@@ -299,7 +319,7 @@ export function migrarRolAntiguo(rolAntiguo?: string): Rol {
     'prevencion-riesgos': 'profesional',
     'administrativo': 'profesional',
     'visitador-obra': 'visitador',
-    'administrador': 'visitador',
+    'administrador': 'gerente',
     'usuario': 'profesional',
     'supervisor': 'visitador',
     'gerente': 'gerente',
@@ -307,4 +327,15 @@ export function migrarRolAntiguo(rolAntiguo?: string): Rol {
   }
 
   return mapeo[rolAntiguo || ''] || 'profesional'
+}
+
+// Obtener nivel jerárquico de un rol (para comparaciones)
+export function getNivelRol(rol: Rol): number {
+  const niveles: Record<Rol, number> = {
+    'profesional': 1,
+    'visitador': 2,
+    'gerente': 3,
+    'super-admin': 4
+  }
+  return niveles[rol] || 0
 }

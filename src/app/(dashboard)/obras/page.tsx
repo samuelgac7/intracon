@@ -19,13 +19,24 @@ export default function ObrasPage() {
   const [loading, setLoading] = useState(true)
   const [dialogNueva, setDialogNueva] = useState(false)
 
-  const [formNueva, setFormNueva] = useState({
+  const [formNueva, setFormNueva] = useState<{
+    nombre: string
+    direccion: string
+    comuna: string
+    region: string
+    cliente: string
+    tipo: 'construccion' | 'remodelacion' | 'mantenimiento' | 'otro'
+    fechaInicio: string
+    fechaTermino: string
+    montoContrato: string
+    descripcion: string
+  }>({
     nombre: "",
     direccion: "",
     comuna: "",
     region: "Metropolitana",
     cliente: "",
-    tipo: "construccion" as const,
+    tipo: "construccion",
     fechaInicio: new Date().toISOString().split('T')[0],
     fechaTermino: "",
     montoContrato: "",
@@ -103,9 +114,10 @@ export default function ObrasPage() {
       // Navegar al detalle
       router.push(`/obras/${obraCreada.id}`)
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creando obra:', error)
-      alert(`Error al crear obra: ${error.message || 'Error desconocido'}`)
+      const message = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Error desconocido'
+      alert(`Error al crear obra: ${message}`)
     }
   }
 
@@ -128,7 +140,7 @@ export default function ObrasPage() {
       XLSX.utils.book_append_sheet(wb, ws, "Obras")
       XLSX.writeFile(wb, `Obras_${new Date().toISOString().split('T')[0]}.xlsx`)
       alert(`Excel generado: ${datos.length} obras`)
-    } catch (error) {
+    } catch {
       alert('Error al generar Excel')
     }
   }
@@ -143,7 +155,7 @@ export default function ObrasPage() {
         orientation: 'landscape',
         unit: 'mm',
         format: 'a4'
-      }) as any
+      }) as InstanceType<typeof jsPDF> & { autoTable: (options: unknown) => void; lastAutoTable: { finalY: number } }
 
       doc.setFontSize(20)
       doc.setTextColor(0, 102, 204)
@@ -175,7 +187,7 @@ export default function ObrasPage() {
 
       doc.save(`Obras_${new Date().toISOString().split('T')[0]}.pdf`)
       alert(`PDF generado: ${obras.length} obras`)
-    } catch (error) {
+    } catch {
       alert('Error al generar PDF')
     }
   }
@@ -265,7 +277,7 @@ export default function ObrasPage() {
 
             <div>
               <Label>Tipo de Obra</Label>
-              <Select value={formNueva.tipo} onValueChange={(value: any) => setFormNueva({...formNueva, tipo: value})}>
+              <Select value={formNueva.tipo} onValueChange={(value) => setFormNueva({...formNueva, tipo: value as 'construccion' | 'remodelacion' | 'mantenimiento' | 'otro'})}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

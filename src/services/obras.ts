@@ -257,19 +257,22 @@ export const obrasService = {
 
       if (error) {
         // Si es error de constraint única, lanzar mensaje amigable
-        if (error.message?.includes('idx_trabajador_obra_activa_unica') ||
-            error.code === '23505') {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        const pgError = error as { code?: string }
+        if (errorMessage?.includes('idx_trabajador_obra_activa_unica') || pgError.code === '23505') {
           throw new Error('El trabajador ya está asignado a otra obra. Un trabajador solo puede estar en una obra a la vez.')
         }
         throw error
       }
 
       return data as AsignacionTrabajador
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Re-lanzar con mensaje amigable si es el error de constraint
-      if (error.message?.includes('idx_trabajador_obra_activa_unica') ||
-          error.code === '23505' ||
-          error.message?.includes('ya está asignado')) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      const pgError = error as { code?: string }
+      if (errorMessage?.includes('idx_trabajador_obra_activa_unica') ||
+          pgError.code === '23505' ||
+          errorMessage?.includes('ya está asignado')) {
         throw new Error('El trabajador ya está asignado a otra obra. Un trabajador solo puede estar en una obra a la vez.')
       }
       throw error

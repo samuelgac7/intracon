@@ -7,10 +7,10 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useState, useEffect } from 'react'
-import { 
-  Building2, Mail, Phone, Save, Upload, 
-  Shield, Database, AlertCircle, Info, 
-  Download, RefreshCw, Settings
+import {
+  Building2, Save,
+  Shield, AlertCircle, Info,
+  Settings
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/ui/toast'
@@ -149,11 +149,11 @@ export default function TabGeneral() {
         title: 'Guardado',
         description: 'Configuración actualizada'
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       addToast({
         type: 'error',
         title: 'Error',
-        description: error.message
+        description: error instanceof Error ? error.message : String(error)
       })
     } finally {
       setGuardando(false)
@@ -188,11 +188,11 @@ export default function TabGeneral() {
         title: 'Guardado',
         description: 'Configuración actualizada'
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       addToast({
         type: 'error',
         title: 'Error',
-        description: error.message
+        description: error instanceof Error ? error.message : String(error)
       })
     } finally {
       setGuardando(false)
@@ -227,11 +227,11 @@ export default function TabGeneral() {
         title: 'Guardado',
         description: 'Configuración actualizada'
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       addToast({
         type: 'error',
         title: 'Error',
-        description: error.message
+        description: error instanceof Error ? error.message : String(error)
       })
     } finally {
       setGuardando(false)

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -354,10 +355,12 @@ export default function TrabajadoresList({
                               {/* Avatar */}
                               <div className="flex-shrink-0">
                                 {trabajador.foto ? (
-                                  <img
+                                  <Image
                                     src={trabajador.foto}
                                     alt={trabajador.nombre}
-                                    className="h-10 w-10 rounded-full object-cover"
+                                    width={40}
+                                    height={40}
+                                    className="rounded-full object-cover"
                                   />
                                 ) : (
                                   <div
@@ -425,10 +428,12 @@ export default function TrabajadoresList({
                     {/* Avatar */}
                     <div className="flex-shrink-0">
                       {trabajador.foto ? (
-                        <img
+                        <Image
                           src={trabajador.foto}
                           alt={trabajador.nombre}
-                          className="h-10 w-10 rounded-full object-cover"
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover"
                         />
                       ) : (
                         <div

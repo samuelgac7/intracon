@@ -12,11 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useState, useEffect, useTransition, useRef } from "react"
+import { useState, useEffect, useTransition, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import {
   ArrowLeft, Building2, MapPin, DollarSign, Users, Calendar,
-  TrendingUp, Clock, BarChart3, Activity, CheckCircle2,
+  TrendingUp, Clock, BarChart3, CheckCircle2,
   Plus, Package, FileText, ClipboardList, Upload, Download, File, PlusCircle
 } from "lucide-react"
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js'
@@ -137,12 +138,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
     params.then(p => setObraId(p.id))
   }, [params])
 
-  useEffect(() => {
-    if (!obraId) return
-    cargarDatos()
-  }, [obraId])
-
-  const cargarDatos = async () => {
+  const cargarDatos = useCallback(async () => {
     if (!obraId) return
 
     // Guardar obra anterior para mostrar durante la transición
@@ -182,7 +178,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
         if (materialesData.data) setMateriales(materialesData.data)
       })
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error)
       addToast({
         type: "error",
@@ -192,7 +188,12 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
     } finally {
       setLoading(false)
     }
-  }
+  }, [obraId, obra, startTransition, addToast])
+
+  useEffect(() => {
+    if (!obraId) return
+    cargarDatos()
+  }, [obraId, cargarDatos])
 
   const guardarObra = async (obraActualizada: Obra) => {
     try {
@@ -203,11 +204,12 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
         title: "Guardado",
         description: "Cambios guardados correctamente"
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : "No se pudo guardar"
       addToast({
         type: "error",
         title: "Error",
-        description: error.message || "No se pudo guardar"
+        description: errorMessage
       })
     }
   }
@@ -256,7 +258,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
           description: "Gasto agregado exitosamente"
         })
       }
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -302,7 +304,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
           description: "Hito creado exitosamente"
         })
       }
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -331,7 +333,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
           ? { ...h, completado: !h.completado, fecha_real: !h.completado ? new Date().toISOString() : undefined }
           : h
       ))
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -377,7 +379,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
           description: "Bitácora actualizada"
         })
       }
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -422,7 +424,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
           description: "Material registrado exitosamente"
         })
       }
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -464,8 +466,9 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
 
       // Recargar datos
       cargarDatos()
-    } catch (error: any) {
-      const errorMessage = error?.message || error?.toString() || ''
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) :
+                          (typeof error === 'string' ? error : 'Error desconocido')
 
       addToast({
         type: "error",
@@ -499,7 +502,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
       
       // Recargar datos
       cargarDatos()
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -545,7 +548,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
               description: file.name
             })
           }
-        } catch (error: any) {
+        } catch {
           addToast({
             type: "error",
             title: "Error",
@@ -649,7 +652,7 @@ export default function ObraDetallePage({ params }: { params: Promise<{ id: stri
           {/* Info principal */}
           <div className="flex items-start gap-4">
             {obra.foto ? (
-              <img src={obra.foto} alt={obra.nombre} className="h-20 w-20 rounded-lg object-cover" />
+              <Image src={obra.foto} alt={obra.nombre} width={80} height={80} className="h-20 w-20 rounded-lg object-cover" />
             ) : (
               <div className="flex h-20 w-20 items-center justify-center rounded-lg" style={{ backgroundColor: '#0066cc20' }}>
                 <Building2 className="h-10 w-10" style={{ color: '#0066cc' }} />

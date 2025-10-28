@@ -37,12 +37,12 @@ async function sendEmail({ to, subject, html }: EmailParams) {
 
     if (error) {
       console.error('❌ Error enviando email:', error)
-      throw new Error(`Error enviando email: ${error.message}`)
+      throw new Error(`Error enviando email: ${error instanceof Error ? error.message : String(error)}`)
     }
 
     console.log('✅ Email enviado exitosamente a:', to, 'ID:', data?.id)
     return { success: true, data }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error enviando email:', error)
     throw error
   }
@@ -300,7 +300,9 @@ export async function enviarEmailSolicitudRechazada(params: {
   })
 }
 
-export default {
+const emailService = {
   enviarEmailSolicitudAprobada,
   enviarEmailSolicitudRechazada
 }
+
+export default emailService

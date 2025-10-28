@@ -6,12 +6,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Shield, Lock, Eye, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react'
 import { useState } from 'react'
 
-interface Permiso {
-  modulo: string
-  accion: string
-  descripcion: string
-}
-
 interface RolPermisos {
   rol: string
   nombre: string
@@ -57,6 +51,17 @@ export default function TabPermisos() {
       ]
     },
     {
+      id: 'asistencia',
+      nombre: 'Asistencia',
+      icon: '📅',
+      acciones: [
+        { id: 'read', nombre: 'Ver', descripcion: 'Ver registros de asistencia' },
+        { id: 'create', nombre: 'Registrar', descripcion: 'Marcar asistencia diaria' },
+        { id: 'update', nombre: 'Editar', descripcion: 'Modificar registros' },
+        { id: 'export', nombre: 'Exportar', descripcion: 'Exportar a Excel' }
+      ]
+    },
+    {
       id: 'contratos',
       nombre: 'Contratos',
       icon: '📄',
@@ -64,8 +69,7 @@ export default function TabPermisos() {
         { id: 'read', nombre: 'Ver', descripcion: 'Ver contratos' },
         { id: 'create', nombre: 'Crear', descripcion: 'Generar nuevos contratos' },
         { id: 'update', nombre: 'Editar', descripcion: 'Modificar contratos' },
-        { id: 'delete', nombre: 'Eliminar', descripcion: 'Eliminar contratos' },
-        { id: 'sign', nombre: 'Firmar', descripcion: 'Firmar y finalizar contratos' }
+        { id: 'delete', nombre: 'Eliminar', descripcion: 'Eliminar contratos' }
       ]
     },
     {
@@ -79,14 +83,24 @@ export default function TabPermisos() {
       ]
     },
     {
-      id: 'finanzas',
-      nombre: 'Finanzas',
+      id: 'liquidaciones',
+      nombre: 'Liquidaciones',
       icon: '💰',
       acciones: [
-        { id: 'read', nombre: 'Ver', descripcion: 'Ver información financiera' },
-        { id: 'create', nombre: 'Crear', descripcion: 'Registrar gastos e ingresos' },
-        { id: 'update', nombre: 'Editar', descripcion: 'Modificar registros financieros' },
-        { id: 'reports', nombre: 'Reportes', descripcion: 'Generar reportes financieros' }
+        { id: 'read', nombre: 'Ver', descripcion: 'Ver liquidaciones' },
+        { id: 'create', nombre: 'Crear', descripcion: 'Generar liquidaciones' },
+        { id: 'update', nombre: 'Editar', descripcion: 'Modificar liquidaciones' },
+        { id: 'export', nombre: 'Exportar', descripcion: 'Exportar a PDF/Excel' }
+      ]
+    },
+    {
+      id: 'reportes',
+      nombre: 'Reportes',
+      icon: '📈',
+      acciones: [
+        { id: 'read', nombre: 'Ver', descripcion: 'Ver reportes' },
+        { id: 'generate', nombre: 'Generar', descripcion: 'Generar reportes personalizados' },
+        { id: 'export', nombre: 'Exportar', descripcion: 'Exportar reportes' }
       ]
     },
     {
@@ -107,8 +121,7 @@ export default function TabPermisos() {
       icon: '⚙️',
       acciones: [
         { id: 'read', nombre: 'Ver', descripcion: 'Ver configuración' },
-        { id: 'update', nombre: 'Editar', descripcion: 'Modificar configuración del sistema' },
-        { id: 'backup', nombre: 'Respaldos', descripcion: 'Crear y restaurar respaldos' }
+        { id: 'update', nombre: 'Editar', descripcion: 'Modificar configuración del sistema' }
       ]
     }
   ]
@@ -117,86 +130,77 @@ export default function TabPermisos() {
     {
       rol: 'super-admin',
       nombre: 'Super Administrador',
-      descripcion: 'Acceso total al sistema. Control completo de usuarios, configuración y datos.',
+      descripcion: 'Acceso total al sistema. Control completo de usuarios, configuración y todos los módulos.',
       color: 'bg-red-100 text-red-800 border-red-200',
-      nivel: 5,
+      nivel: 4,
       permisos: {
         dashboard: ['read'],
         trabajadores: ['read', 'create', 'update', 'delete'],
         obras: ['read', 'create', 'update', 'delete', 'manage'],
-        contratos: ['read', 'create', 'update', 'delete', 'sign'],
+        asistencia: ['read', 'create', 'update', 'export'],
+        contratos: ['read', 'create', 'update', 'delete'],
         documentos: ['read', 'upload', 'delete'],
-        finanzas: ['read', 'create', 'update', 'reports'],
+        liquidaciones: ['read', 'create', 'update', 'export'],
+        reportes: ['read', 'generate', 'export'],
         usuarios: ['read', 'create', 'update', 'delete', 'manage-roles'],
-        configuracion: ['read', 'update', 'backup']
+        configuracion: ['read', 'update']
       }
     },
     {
       rol: 'gerente',
       nombre: 'Gerente',
-      descripcion: 'Acceso gerencial completo. Gestión de personal, obras y finanzas.',
+      descripcion: 'Dashboard ejecutivo empresarial con KPIs estratégicos. Visión general de toda la empresa. Gestión y aprobaciones.',
       color: 'bg-purple-100 text-purple-800 border-purple-200',
-      nivel: 4,
+      nivel: 3,
       permisos: {
         dashboard: ['read'],
-        trabajadores: ['read', 'create', 'update'],
-        obras: ['read', 'create', 'update', 'manage'],
-        contratos: ['read', 'create', 'update', 'sign'],
+        trabajadores: ['read', 'create', 'update', 'delete'],
+        obras: ['read', 'create', 'update', 'delete', 'manage'],
+        asistencia: ['read', 'create', 'update', 'export'],
+        contratos: ['read', 'create', 'update', 'delete'],
         documentos: ['read', 'upload', 'delete'],
-        finanzas: ['read', 'create', 'update', 'reports'],
-        usuarios: ['read', 'create'],
+        liquidaciones: ['read', 'create', 'update', 'export'],
+        reportes: ['read', 'generate', 'export'],
+        usuarios: ['read', 'create', 'update'],
         configuracion: ['read']
       }
     },
     {
-      rol: 'administrador',
-      nombre: 'Administrador',
-      descripcion: 'Gestión operativa completa. Control de trabajadores, obras y contratos.',
+      rol: 'visitador',
+      nombre: 'Visitador',
+      descripcion: 'Dashboard supervisor con KPIs de obras asignadas. Supervisa profesionales. Revisión de métricas y gestión ocasional.',
       color: 'bg-blue-100 text-blue-800 border-blue-200',
-      nivel: 3,
+      nivel: 2,
       permisos: {
         dashboard: ['read'],
-        trabajadores: ['read', 'create', 'update'],
-        obras: ['read', 'create', 'update', 'manage'],
-        contratos: ['read', 'create', 'update'],
+        trabajadores: ['read', 'update'],
+        obras: ['read', 'update'],
+        asistencia: ['read', 'create', 'update', 'export'],
+        contratos: ['read', 'create'],
         documentos: ['read', 'upload'],
-        finanzas: ['read'],
+        liquidaciones: ['read', 'export'],
+        reportes: ['read', 'export'],
         usuarios: ['read'],
         configuracion: ['read']
       }
     },
     {
-      rol: 'supervisor',
-      nombre: 'Supervisor',
-      descripcion: 'Supervisión de obras. Gestión de trabajadores asignados y avance de proyectos.',
+      rol: 'profesional',
+      nombre: 'Profesional',
+      descripcion: 'Usuario operativo diario (admin, RRHH, prevención). Gestión completa de trabajadores, obras, documentos y contratos.',
       color: 'bg-green-100 text-green-800 border-green-200',
-      nivel: 2,
-      permisos: {
-        dashboard: ['read'],
-        trabajadores: ['read', 'update'],
-        obras: ['read', 'update', 'manage'],
-        contratos: ['read'],
-        documentos: ['read', 'upload'],
-        finanzas: ['read'],
-        usuarios: [],
-        configuracion: []
-      }
-    },
-    {
-      rol: 'usuario',
-      nombre: 'Usuario',
-      descripcion: 'Acceso básico de consulta. Visualización de información personal y obras asignadas.',
-      color: 'bg-gray-100 text-gray-800 border-gray-200',
       nivel: 1,
       permisos: {
         dashboard: ['read'],
-        trabajadores: ['read'],
-        obras: ['read'],
-        contratos: ['read'],
-        documentos: ['read'],
-        finanzas: [],
-        usuarios: [],
-        configuracion: []
+        trabajadores: ['read', 'create', 'update'],
+        obras: ['read', 'create', 'update', 'manage'],
+        asistencia: ['read', 'create', 'update', 'export'],
+        contratos: ['read', 'create', 'update'],
+        documentos: ['read', 'upload', 'delete'],
+        liquidaciones: ['read', 'create', 'export'],
+        reportes: ['read', 'generate'],
+        usuarios: ['read'],
+        configuracion: ['read']
       }
     }
   ]
@@ -217,10 +221,9 @@ export default function TabPermisos() {
       delete: <Trash2 className="h-3 w-3" />,
       manage: <Shield className="h-3 w-3" />,
       upload: <Edit className="h-3 w-3" />,
-      sign: <CheckCircle className="h-3 w-3" />,
-      reports: <Eye className="h-3 w-3" />,
-      'manage-roles': <Shield className="h-3 w-3" />,
-      backup: <Shield className="h-3 w-3" />
+      export: <Edit className="h-3 w-3" />,
+      generate: <Shield className="h-3 w-3" />,
+      'manage-roles': <Shield className="h-3 w-3" />
     }
     return iconos[accionId] || <Lock className="h-3 w-3" />
   }
@@ -230,7 +233,7 @@ export default function TabPermisos() {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          <strong>Sistema de Permisos:</strong> Define qué acciones puede realizar cada rol en el sistema. 
+          <strong>Sistema de Permisos:</strong> Define qué acciones puede realizar cada rol en el sistema.
           Los permisos se heredan jerárquicamente de mayor a menor nivel.
         </AlertDescription>
       </Alert>
@@ -241,13 +244,13 @@ export default function TabPermisos() {
           <CardTitle>Roles del Sistema</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             {rolesPermisos.map((rol) => (
               <Card
                 key={rol.rol}
                 className={`cursor-pointer transition-all hover:shadow-md ${
-                  rolSeleccionado === rol.rol 
-                    ? 'ring-2 ring-blue-500 shadow-md' 
+                  rolSeleccionado === rol.rol
+                    ? 'ring-2 ring-blue-500 shadow-md'
                     : 'hover:bg-gray-50'
                 }`}
                 onClick={() => setRolSeleccionado(rol.rol)}
@@ -261,7 +264,7 @@ export default function TabPermisos() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold mb-1">{rol.nombre}</h4>
-                      <p className="text-xs text-gray-600 mb-2">{rol.descripcion}</p>
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">{rol.descripcion}</p>
                       <Badge className={rol.color} variant="outline">
                         Nivel {rol.nivel}
                       </Badge>
@@ -311,13 +314,13 @@ export default function TabPermisos() {
                     <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
                       {modulo.acciones.map((accion) => {
                         const tiene = tienePermiso(modulo.id, accion.id)
-                        
+
                         return (
                           <div
                             key={accion.id}
                             className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
-                              tiene 
-                                ? 'bg-green-50 border-green-200' 
+                              tiene
+                                ? 'bg-green-50 border-green-200'
                                 : 'bg-gray-50 border-gray-200'
                             }`}
                           >
@@ -364,7 +367,7 @@ export default function TabPermisos() {
                   <p>• <strong>Módulos con acceso:</strong> {Object.keys(rolActual.permisos).filter(m => rolActual.permisos[m].length > 0).length}</p>
                   <p>• <strong>Total de permisos:</strong> {Object.values(rolActual.permisos).flat().length}</p>
                   <p className="mt-2 pt-2 border-t border-blue-200">
-                    {rolActual.rol === 'super-admin' 
+                    {rolActual.rol === 'super-admin'
                       ? '🔓 Acceso total sin restricciones'
                       : `🔒 Acceso limitado según rol ${rolActual.nombre}`
                     }

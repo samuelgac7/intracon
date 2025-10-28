@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  FileText, AlertTriangle, CheckCircle2, Clock, Users, Building2,
-  ChevronDown, ChevronRight, Search, Filter, Plus, Eye, ExternalLink,
-  TrendingDown, TrendingUp, BarChart3, Bell, Send
+  AlertTriangle, CheckCircle2, Clock, Users, Building2,
+  ChevronDown, ChevronRight, Search, Plus, Eye, ExternalLink,
+  Send
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { obrasService } from '@/services/obras'
@@ -78,7 +78,7 @@ export default function GestionDocumentalPage() {
       setAlertas(alertasFiltradas)
     } catch (error) {
       console.error('Error cargando datos:', error)
-      alert('Error al cargar alertas de contratos: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      alert('Error al cargar alertas de contratos: ' + (error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Error desconocido'))
     } finally {
       setLoading(false)
     }
@@ -268,7 +268,7 @@ export default function GestionDocumentalPage() {
       alert(`✅ ${data.notificacionesEnviadas} notificación(es) enviada(s) exitosamente${data.errores ? `\n\n⚠️ Algunos errores: ${data.errores.join(', ')}` : ''}`)
     } catch (error) {
       console.error('Error enviando notificaciones:', error)
-      alert(`❌ Error enviando notificaciones: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+      alert(`❌ Error enviando notificaciones: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Error desconocido'}`)
     } finally {
       setEnviandoNotificaciones(false)
     }

@@ -1,7 +1,8 @@
 "use client"
 
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -12,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useState, useEffect } from "react"
 import { Calendar, ChevronLeft, ChevronRight, Download, Save, Users, Clock, TrendingUp, CalendarDays, FileSpreadsheet } from "lucide-react"
 import AsistenciaMensualView from "./AsistenciaMensualView"
-import { asistenciaService, asistenciaUtils, EstadoAsistencia, CreateAsistenciaDTO } from "@/services/asistencia"
+import { asistenciaService, asistenciaUtils, EstadoAsistencia } from "@/services/asistencia"
 import { descargarAsistenciaExcel } from "@/services/excel-asistencia"
 import { useToast } from "@/components/ui/toast"
 
@@ -469,10 +470,12 @@ export default function AsistenciaObraTab({ obraId, nombreObra }: AsistenciaObra
                 <div className="flex items-start gap-4">
                   {/* Foto del trabajador */}
                   {trabajador.foto ? (
-                    <img
+                    <Image
                       src={trabajador.foto}
                       alt={trabajador.nombre}
-                      className="h-16 w-16 rounded-full object-cover flex-shrink-0"
+                      width={64}
+                      height={64}
+                      className="rounded-full object-cover flex-shrink-0"
                     />
                   ) : (
                     <div

@@ -4,7 +4,7 @@
  */
 
 import ExcelJS from 'exceljs'
-import { asistenciaService, asistenciaUtils, DatosExportacionExcel } from './asistencia'
+import { asistenciaService, asistenciaUtils } from './asistencia'
 
 /**
  * Colores exactos del formato de asistencia
@@ -338,7 +338,9 @@ export async function descargarAsistenciaExcel(
   window.URL.revokeObjectURL(url)
 }
 
-export default {
+const excelAsistenciaService = {
   exportarAsistenciaMensual,
   descargarAsistenciaExcel
 }
+
+export default excelAsistenciaService

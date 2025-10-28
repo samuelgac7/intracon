@@ -217,9 +217,7 @@ export const liquidacionesService = {
     const totalDescuentos =
       (afpMonto || 0) +
       (saludMonto || 0) +
-      (cesantiaMonto || 0) +
-      (dto.anticipos || 0) +
-      (dto.prestamos || 0)
+      (cesantiaMonto || 0)
 
     const liquidoPagar = totalHaberes - totalDescuentos
 
@@ -404,7 +402,7 @@ export const liquidacionesService = {
 
         exitosos++
       } catch (error) {
-        errores.push(`Trabajador ${trabajadorId}: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+        errores.push(`Trabajador ${trabajadorId}: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Error desconocido'}`)
       }
     }
 

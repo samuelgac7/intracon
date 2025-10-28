@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Error interno del servidor'
+        error: error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Error interno del servidor'
       },
       { status: 500 }
     )

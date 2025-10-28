@@ -25,13 +25,13 @@ export async function GET() {
       totalSolicitudes: todas.length,
       solicitudes: todas
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Test API: Error:', error)
     return NextResponse.json({
       success: false,
-      error: error.message,
-      details: error.toString(),
-      stack: error.stack
+      error: error instanceof Error ? error.message : String(error),
+      details: String(error),
+      stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 })
   }
 }

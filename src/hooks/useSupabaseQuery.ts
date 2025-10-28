@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 interface UseSupabaseQueryOptions<T> {
-  queryKey: string | any[]
+  queryKey: string | unknown[]
   queryFn: () => Promise<T>
   enabled?: boolean
   refetchInterval?: number
@@ -79,7 +79,7 @@ export function useSupabaseQuery<T>({
       setError(error)
 
       // Log error pero no propagar para evitar loops
-      console.error(`[useSupabaseQuery] Error en ${queryKeyString}:`, error.message)
+      console.error(`[useSupabaseQuery] Error en ${queryKeyString}:`, error instanceof Error ? error.message : String(error))
 
       if (onErrorRef.current) {
         onErrorRef.current(error)

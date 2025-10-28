@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, X, Users, Calendar, Briefcase, ExternalLink, Shield, Edit } from "lucide-react"
+import Image from "next/image"
+import { Plus, X, Users, Calendar, Briefcase, ExternalLink, Edit } from "lucide-react"
 import { trabajadoresService } from "@/services/trabajadores"
 import { supabase } from "@/lib/supabase"
 import type { Trabajador } from "@/lib/supabase"
@@ -225,10 +226,12 @@ export default function TrabajadoresObraTab({
                   <CardContent className="pt-4 pb-4">
                     <div className="flex items-center gap-3">
                       {trabajador.foto ? (
-                        <img 
-                          src={trabajador.foto} 
-                          alt={trabajador.nombre} 
-                          className="h-10 w-10 rounded-full object-cover flex-shrink-0" 
+                        <Image
+                          src={trabajador.foto}
+                          alt={trabajador.nombre}
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover flex-shrink-0"
                         />
                       ) : (
                         <div 
@@ -279,10 +282,12 @@ export default function TrabajadoresObraTab({
             {/* Header del trabajador */}
             <div className="flex items-start gap-4 pb-4 border-b">
               {trabajadorDetalle.foto ? (
-                <img 
-                  src={trabajadorDetalle.foto} 
-                  alt={trabajadorDetalle.nombre} 
-                  className="h-20 w-20 rounded-full object-cover" 
+                <Image
+                  src={trabajadorDetalle.foto}
+                  alt={trabajadorDetalle.nombre}
+                  width={80}
+                  height={80}
+                  className="rounded-full object-cover"
                 />
               ) : (
                 <div 

@@ -103,7 +103,7 @@ export async function enviarNotificacionesContratosProximosVencer() {
 
       } catch (error) {
         console.error(`❌ Error procesando obra ${obraData.obraId}:`, error)
-        errores.push(`Obra ${obraData.obraId}: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+        errores.push(`Obra ${obraData.obraId}: ${error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Error desconocido'}`)
       }
     }
 
@@ -124,7 +124,7 @@ export async function enviarNotificacionesContratosProximosVencer() {
     return {
       success: false,
       notificaciones: 0,
-      error: error instanceof Error ? error.message : 'Error desconocido'
+      error: error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Error desconocido'
     }
   }
 }
@@ -269,15 +269,245 @@ async function enviarEmailAlertaVencimiento({
   })
 
   if (error) {
-    throw new Error(`Error enviando email a ${destinatario.email}: ${error.message}`)
+    throw new Error(`Error enviando email a ${destinatario.email}: ${error instanceof Error ? error.message : String(error)}`)
   }
 
   return { success: true, data }
 }
 
 /**
+ * Tipo de notificación
+ */
+export interface Notificacion {
+  id: number
+  usuario_id: number
+  tipo: string
+  titulo: string
+  mensaje?: string
+  link?: string
+  leida: boolean
+  metadata?: any
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Obtener notificaciones de un usuario
+ */
+export async function getNotificacionesUsuario(
+  usuarioId: number,
+  limite: number = 20,
+  soloNoLeidas: boolean = false
+): Promise<Notificacion[]> {
+  try {
+    let query = supabase
+      .from('notificaciones')
+      .select('*')
+      .eq('usuario_id', usuarioId)
+      .order('created_at', { ascending: false })
+      .limit(limite)
+
+    if (soloNoLeidas) {
+      query = query.eq('leida', false)
+    }
+
+    const { data, error } = await query
+
+    if (error) throw error
+
+    return data || []
+  } catch (error) {
+    console.error('Error obteniendo notificaciones:', error)
+    return []
+  }
+}
+
+/**
+ * Contar notificaciones no leídas
+ */
+export async function contarNoLeidas(usuarioId: number): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from('notificaciones')
+      .select('*', { count: 'exact', head: true })
+      .eq('usuario_id', usuarioId)
+      .eq('leida', false)
+
+    if (error) throw error
+
+    return count || 0
+  } catch (error) {
+    console.error('Error contando notificaciones no leídas:', error)
+    return 0
+  }
+}
+
+/**
+ * Crear una notificación
+ */
+export async function crearNotificacion(params: {
+  usuario_id: number
+  tipo: string
+  titulo: string
+  mensaje?: string
+  link?: string
+  metadata?: any
+}): Promise<Notificacion | null> {
+  try {
+    const { data, error } = await supabase
+      .from('notificaciones')
+      .insert([{
+        usuario_id: params.usuario_id,
+        tipo: params.tipo,
+        titulo: params.titulo,
+        mensaje: params.mensaje,
+        link: params.link,
+        metadata: params.metadata || {},
+        leida: false
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return data
+  } catch (error) {
+    console.error('Error creando notificación:', error)
+    return null
+  }
+}
+
+/**
+ * Marcar notificación como leída
+ */
+export async function marcarComoLeida(notificacionId: number): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('notificaciones')
+      .update({ leida: true })
+      .eq('id', notificacionId)
+
+    if (error) throw error
+
+    return true
+  } catch (error) {
+    console.error('Error marcando notificación como leída:', error)
+    return false
+  }
+}
+
+/**
+ * Marcar todas las notificaciones como leídas
+ */
+export async function marcarTodasComoLeidas(usuarioId: number): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('notificaciones')
+      .update({ leida: true })
+      .eq('usuario_id', usuarioId)
+      .eq('leida', false)
+
+    if (error) throw error
+
+    return true
+  } catch (error) {
+    console.error('Error marcando todas las notificaciones como leídas:', error)
+    return false
+  }
+}
+
+/**
+ * Eliminar notificación
+ */
+export async function eliminarNotificacion(notificacionId: number): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('notificaciones')
+      .delete()
+      .eq('id', notificacionId)
+
+    if (error) throw error
+
+    return true
+  } catch (error) {
+    console.error('Error eliminando notificación:', error)
+    return false
+  }
+}
+
+/**
+ * Crear notificaciones para contratos próximos a vencer
+ * (complementa el envío de emails)
+ */
+export async function crearNotificacionesContratosVencer(): Promise<number> {
+  try {
+    const alertas = await contratosService.getAlertas()
+    const alertas7Dias = alertas.filter(a =>
+      a.urgencia === 'POR_VENCER' && a.dias_restantes === 7
+    )
+
+    if (alertas7Dias.length === 0) return 0
+
+    // Agrupar por obra y obtener encargados
+    const alertasPorObra = alertas7Dias.reduce((acc, alerta) => {
+      if (!acc[alerta.obra_id]) {
+        acc[alerta.obra_id] = {
+          obraId: alerta.obra_id,
+          obraNombre: alerta.obra_nombre,
+          alertas: []
+        }
+      }
+      acc[alerta.obra_id].alertas.push(alerta)
+      return acc
+    }, {} as Record<number, { obraId: number; obraNombre: string; alertas: AlertaContrato[] }>)
+
+    let notificacionesCreadas = 0
+
+    for (const obraData of Object.values(alertasPorObra)) {
+      const { data: obra } = await supabase
+        .from('obras')
+        .select('id, nombre, encargado_id')
+        .eq('id', obraData.obraId)
+        .single()
+
+      if (!obra || !obra.encargado_id) continue
+
+      const trabajadores = obraData.alertas.map(a => a.trabajador_nombre).join(', ')
+      const mensaje = `${obraData.alertas.length} contrato(s) vencen en 7 días: ${trabajadores}`
+
+      const notif = await crearNotificacion({
+        usuario_id: obra.encargado_id,
+        tipo: 'contrato_por_vencer',
+        titulo: `Contratos por vencer - ${obra.nombre}`,
+        mensaje,
+        link: `/recursos-humanos/documentacion`,
+        metadata: {
+          obra_id: obra.id,
+          obra_nombre: obra.nombre,
+          cantidad_contratos: obraData.alertas.length
+        }
+      })
+
+      if (notif) notificacionesCreadas++
+    }
+
+    return notificacionesCreadas
+  } catch (error) {
+    console.error('Error creando notificaciones de contratos:', error)
+    return 0
+  }
+}
+
+/**
  * Exportar funciones para uso externo
  */
 export const notificacionesService = {
-  enviarNotificacionesContratosProximosVencer
+  enviarNotificacionesContratosProximosVencer,
+  getNotificacionesUsuario,
+  contarNoLeidas,
+  crearNotificacion,
+  marcarComoLeida,
+  marcarTodasComoLeidas,
+  eliminarNotificacion,
+  crearNotificacionesContratosVencer
 }

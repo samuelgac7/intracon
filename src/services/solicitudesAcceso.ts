@@ -198,7 +198,7 @@ class SolicitudesAccesoService {
 
     if (error) {
       console.error('Error actualizando solicitud:', error)
-      throw new Error(`Error actualizando solicitud: ${error.message}`)
+      throw new Error(`Error actualizando solicitud: ${error instanceof Error ? error.message : String(error)}`)
     }
 
     if (!solicitud) {
@@ -277,4 +277,5 @@ class SolicitudesAccesoService {
   }
 }
 
-export default new SolicitudesAccesoService()
+const solicitudesAccesoService = new SolicitudesAccesoService()
+export default solicitudesAccesoService

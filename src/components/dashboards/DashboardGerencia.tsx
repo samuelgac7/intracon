@@ -47,11 +47,14 @@ export default function DashboardGerencia({ usuario }: DashboardGerenciaProps) {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        let [trabajadoresData, obrasData, docStats] = await Promise.all([
+        const [trabajadoresDataRaw, obrasDataRaw, docStats] = await Promise.all([
           trabajadoresService.getAll(),
           obrasService.getAll(),
           documentosService.getEstadisticasGlobales()
         ])
+
+        let trabajadoresData = trabajadoresDataRaw
+        let obrasData = obrasDataRaw
 
         // Filtrar por obras asignadas al usuario si corresponde
         if (usuario?.obras_asignadas && usuario.obras_asignadas.length > 0) {
@@ -105,14 +108,14 @@ export default function DashboardGerencia({ usuario }: DashboardGerenciaProps) {
     }]
   }
 
-  // Gráfico: Distribución por Categoría (A, B, C, D, E)
-  const categorias = ['A', 'B', 'C', 'D', 'E']
+  // Gráfico: Distribución por Nivel
+  const niveles = ['obrero', 'tecnico', 'profesional', 'jefatura', 'gerencia']
   const categoriaData = {
-    labels: categorias,
+    labels: niveles.map(n => n.charAt(0).toUpperCase() + n.slice(1)),
     datasets: [{
       label: 'Trabajadores',
-      data: categorias.map(cat =>
-        trabajadores.filter(t => t.categoria === cat).length
+      data: niveles.map(nivel =>
+        trabajadores.filter(t => t.nivel === nivel).length
       ),
       backgroundColor: ['#0066cc', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'],
       borderRadius: 8,

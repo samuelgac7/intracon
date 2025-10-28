@@ -124,9 +124,9 @@ export default function TrabajadoresPage() {
       // Navegar al detalle del trabajador recién creado
       router.push(`/trabajadores/${trabajadorCreado.id}`)
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creando trabajador:', error)
-      alert(`Error al crear trabajador: ${error.message || 'Error desconocido'}`)
+      alert(`Error al crear trabajador: ${error instanceof Error ? error.message : String(error) || 'Error desconocido'}`)
     }
   }
 

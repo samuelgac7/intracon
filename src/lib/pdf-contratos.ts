@@ -402,13 +402,13 @@ export async function subirPDFStorage(
   const path = `${carpeta}/${año}/${nombreArchivo}.pdf`
   
   // Subir archivo
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from('documentos')
     .upload(path, blob, {
       contentType: 'application/pdf',
       upsert: false
     })
-  
+
   if (error) throw error
   
   // Obtener URL pública

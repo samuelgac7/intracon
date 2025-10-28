@@ -8,7 +8,6 @@ import {
   Building2,
   Users,
   AlertTriangle,
-  FileText,
   CheckCircle2,
   XCircle,
   Clock

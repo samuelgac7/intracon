@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useState, useEffect } from 'react'
 import {
-  Plus, Search, UserPlus, Lock, Ban, CheckCircle, Key, Edit,
+  Plus, Search, UserPlus, Ban, CheckCircle, Key,
   AlertCircle, Users as UsersIcon, Eye, EyeOff, RefreshCw, Building2
 } from 'lucide-react'
 import * as usuariosService from '@/services/usuarios'
@@ -28,7 +28,6 @@ export default function TabUsuarios() {
 
   // Dialogs
   const [dialogCrear, setDialogCrear] = useState(false)
-  const [dialogEditar, setDialogEditar] = useState(false)
   const [dialogResetPassword, setDialogResetPassword] = useState(false)
   const [dialogObrasAsignadas, setDialogObrasAsignadas] = useState(false)
 
@@ -160,9 +159,9 @@ export default function TabUsuarios() {
         password: '',
         rol: 'profesional'
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creando usuario:', error)
-      alert(`Error al crear usuario: ${error.message}`)
+      alert(`Error al crear usuario: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -173,9 +172,9 @@ export default function TabUsuarios() {
       await usuariosService.changeRol(usuario.id, nuevoRol)
       await cargarUsuarios()
       alert('Rol actualizado exitosamente')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error cambiando rol:', error)
-      alert(`Error: ${error.message}`)
+      alert(`Error: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -186,9 +185,9 @@ export default function TabUsuarios() {
       await usuariosService.update(usuario.id, { activo: false })
       await cargarUsuarios()
       alert('Usuario desactivado')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error desactivando usuario:', error)
-      alert(`Error: ${error.message}`)
+      alert(`Error: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -199,9 +198,9 @@ export default function TabUsuarios() {
       await usuariosService.activate(usuario.id)
       await cargarUsuarios()
       alert('Usuario reactivado')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error reactivando usuario:', error)
-      alert(`Error: ${error.message}`)
+      alert(`Error: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -218,9 +217,9 @@ export default function TabUsuarios() {
       setNuevaPassword('')
 
       alert(`✅ Contraseña restablecida\n\nNueva contraseña: ${nuevaPassword}\n${mustChangePassword ? 'El usuario deberá cambiarla en su próximo acceso.' : ''}`)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error restableciendo contraseña:', error)
-      alert(`Error: ${error.message}`)
+      alert(`Error: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -240,9 +239,9 @@ export default function TabUsuarios() {
       await cargarUsuarios()
       setDialogObrasAsignadas(false)
       alert('Obras asignadas actualizadas exitosamente')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error actualizando obras asignadas:', error)
-      alert(`Error: ${error.message}`)
+      alert(`Error: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -788,7 +787,7 @@ export default function TabUsuarios() {
                         >
                           <div className="font-medium">{obra.nombre}</div>
                           <div className="text-xs text-gray-500">
-                            {obra.ubicacion} • {obra.estado}
+                            {obra.comuna}, {obra.region} • {obra.estado}
                           </div>
                         </Label>
                       </div>
@@ -801,7 +800,7 @@ export default function TabUsuarios() {
                 <Alert className="mt-4 bg-yellow-50 border-yellow-200">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-sm">
-                    ⚠️ El usuario no tendrá acceso a ninguna obra. Seleccione al menos una obra o active "Acceso a todas las obras".
+                    ⚠️ El usuario no tendrá acceso a ninguna obra. Seleccione al menos una obra o active &quot;Acceso a todas las obras&quot;.
                   </AlertDescription>
                 </Alert>
               )}

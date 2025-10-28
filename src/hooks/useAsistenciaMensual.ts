@@ -283,7 +283,7 @@ export function useAsistenciaMensual(obraId: number, mes: number, anio: number) 
             const nuevosDias = new Map(item.dias)
             nuevosDias.set(dia, {
               id: item.dias.get(dia)?.id,
-              estado: estadoAnterior,
+              estado: estadoAnterior as EstadoAsistencia | null,
               horas_extras: horasAnterior,
               observaciones: observacionesAnterior
             })
@@ -324,7 +324,7 @@ export function useAsistenciaMensual(obraId: number, mes: number, anio: number) 
             const nuevosDias = new Map(item.dias)
             nuevosDias.set(dia, {
               id: item.dias.get(dia)?.id,
-              estado: estadoNuevo,
+              estado: estadoNuevo as EstadoAsistencia | null,
               horas_extras: horasNuevas,
               observaciones: observacionesNuevas
             })
@@ -370,7 +370,7 @@ export function useAsistenciaMensual(obraId: number, mes: number, anio: number) 
       setGuardando(true)
 
       let exitosos = 0
-      let errores: any[] = []
+      const errores: unknown[] = []
 
       // Guardar cada celda modificada individualmente
       for (const item of asistencias) {
@@ -471,7 +471,7 @@ export function useAsistenciaMensual(obraId: number, mes: number, anio: number) 
     asistencias,
     loading,
     guardando,
-    celdasModificadas: celdasModificadas.size,
+    celdasModificadas,
     actualizarCelda,
     copiarEstadoRango,
     guardarCambios,

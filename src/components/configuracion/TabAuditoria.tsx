@@ -8,33 +8,17 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useState, useEffect } from 'react'
 import {
-  History, Search, Download, Filter, Calendar, User,
+  History, Search, Download, Filter, User,
   Shield, FileText, Building2, Users, Settings, Activity,
   Clock, AlertCircle, CheckCircle, XCircle, LogIn, LogOut
 } from 'lucide-react'
 import * as usuariosService from '@/services/usuarios'
-import { trabajadoresService } from '@/services/trabajadores'
-import type { Trabajador } from '@/lib/supabase'
-
-interface LogAuditoria {
-  id: number
-  usuario_id: number
-  accion: string
-  modulo: string
-  detalles?: string
-  ip?: string
-  user_agent?: string
-  fecha: string
-  trabajadores?: {
-    nombre: string
-    rut: string
-    cargo: string
-  }
-}
+import { auditoriaService, type LogAuditoria } from '@/services/auditoria'
+import type { Usuario } from '@/lib/supabase'
 
 export default function TabAuditoria() {
   const [logs, setLogs] = useState<LogAuditoria[]>([])
-  const [usuarios, setUsuarios] = useState<Trabajador[]>([])
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
   
   // Filtros
@@ -51,10 +35,12 @@ export default function TabAuditoria() {
 
   const cargarDatos = async () => {
     try {
-      const usuariosData = await usuariosService.getAll()
+      const [usuariosData, logsData] = await Promise.all([
+        usuariosService.getAll(),
+        auditoriaService.getLogs({ limit: 100 })
+      ])
       setUsuarios(usuariosData)
-      // TODO: Implementar getLogs cuando el servicio de auditoría esté disponible
-      setLogs([])
+      setLogs(logsData)
     } catch (error) {
       console.error('Error cargando datos:', error)
       alert('Error al cargar datos de auditoría')
@@ -66,10 +52,7 @@ export default function TabAuditoria() {
   const aplicarFiltros = async () => {
     setLoading(true)
     try {
-      // TODO: Implementar getLogs cuando el servicio de auditoría esté disponible
-      const logsData: LogAuditoria[] = []
-      /*
-      const logsData = await usuariosService.getLogs({
+      const logsData = await auditoriaService.getLogs({
         usuarioId: filtroUsuario !== 'todos' ? parseInt(filtroUsuario) : undefined,
         modulo: filtroModulo !== 'todos' ? filtroModulo : undefined,
         accion: filtroAccion !== 'todas' ? filtroAccion : undefined,
@@ -77,9 +60,8 @@ export default function TabAuditoria() {
         fechaHasta: fechaHasta || undefined,
         limit: 100
       })
-      */
-      
-      setLogs(logsData as LogAuditoria[])
+
+      setLogs(logsData)
     } catch (error) {
       console.error('Error aplicando filtros:', error)
     } finally {
@@ -102,10 +84,10 @@ export default function TabAuditoria() {
       const XLSX = await import('xlsx')
       const datos = logs.map(log => ({
         'Fecha': new Date(log.fecha).toLocaleString('es-CL'),
-        'Usuario': log.trabajadores?.nombre || 'Sistema',
-        'RUT': log.trabajadores?.rut || '-',
-        'Acción': log.accion,
-        'Módulo': log.modulo,
+        'Usuario': log.usuario?.nombre || 'Sistema',
+        'Email': log.usuario?.email || '-',
+        'Acción': auditoriaService.formatAccion(log.accion),
+        'Módulo': auditoriaService.formatModulo(log.modulo),
         'Detalles': log.detalles || '-',
         'IP': log.ip || '-'
       }))
@@ -124,24 +106,26 @@ export default function TabAuditoria() {
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, ws, "Logs Auditoría")
       XLSX.writeFile(wb, `Logs_Auditoria_${new Date().toISOString().split('T')[0]}.xlsx`)
-      
+
       alert(`Excel generado: ${datos.length} registros`)
-    } catch (error) {
+    } catch {
       alert('Error al generar Excel')
     }
   }
 
   const logsFiltrados = logs.filter(log => {
     if (!busqueda) return true
-    
+
     const busquedaLower = busqueda.toLowerCase()
     return (
-      log.trabajadores?.nombre.toLowerCase().includes(busquedaLower) ||
+      log.usuario?.nombre?.toLowerCase().includes(busquedaLower) ||
+      log.usuario?.email?.toLowerCase().includes(busquedaLower) ||
       log.accion.toLowerCase().includes(busquedaLower) ||
       log.modulo.toLowerCase().includes(busquedaLower) ||
       log.detalles?.toLowerCase().includes(busquedaLower)
     )
   })
+
 
   const getIconoModulo = (modulo: string) => {
     const iconos: Record<string, React.ReactNode> = {
@@ -414,7 +398,7 @@ export default function TabAuditoria() {
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold">{log.trabajadores?.nombre || 'Sistema'}</span>
+                        <span className="font-semibold">{log.usuario?.nombre || 'Sistema'}</span>
                         <Badge className={getColorAccion(log.accion)} variant="outline">
                           {log.accion.replace(/_/g, ' ')}
                         </Badge>

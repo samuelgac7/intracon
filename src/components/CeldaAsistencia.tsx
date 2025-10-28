@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react'
 import { EstadoAsistencia, asistenciaUtils } from '@/services/asistencia'
 import EditarCeldaPopover from './EditarCeldaPopover'
 import HistorialAsistenciaModal from './HistorialAsistenciaModal'
-import { Badge } from "@/components/ui/badge"
 import { Clock } from 'lucide-react'
 import { auditoriaAsistenciaService, RegistroAuditoria } from '@/services/auditoria-asistencia'
 import { supabase } from '@/lib/supabase'
